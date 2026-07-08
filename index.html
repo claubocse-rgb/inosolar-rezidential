@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>inoSOLAR — Calculator oferte</title>
+<style>
+:root{--blue:#1F4E78;--blue2:#2E75B6;--green:#3a9d23;--bg:#f4f6f9;--line:#d8dee7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);color:#1c2733;font-size:14px}
+header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{font-size:18px}header h1 span{color:#ffd24d}
+.wrap{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px;max-width:1280px;margin:0 auto}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--blue);margin-bottom:12px;border-bottom:2px solid var(--blue2);padding-bottom:6px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:12px;font-weight:600;color:#44546a;margin-bottom:3px}
+.field select,.field input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-size:14px;background:#eef4fb;color:#0747a6;font-weight:600}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.calcv{background:#f2f2f2!important;color:#222!important}
+.info{background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:10px;font-size:12.5px;line-height:1.6;margin-top:8px}
+.verif{margin-top:10px}
+.verif h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--blue);margin-bottom:4px}
+.verif .v{padding:8px 10px;border-radius:8px;font-size:12.5px;line-height:1.5;margin-top:6px;border:1px solid}
+.verif .warn{background:#fff1f0;border-color:#ffa39e;color:#a8071a;font-weight:600}
+.verif .ok{background:#f6ffed;border-color:#b7eb8f;color:#237804}
+.verif .neutral{background:#f4f6f9;border-color:var(--line);color:#667}
+td .estflag{color:#a8071a;font-weight:700}
+#gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1F4E78,#2E75B6);display:flex;align-items:center;justify-content:center;padding:20px}
+#gate .box{background:#fff;border-radius:14px;padding:30px 28px;width:100%;max-width:360px;box-shadow:0 18px 50px rgba(0,0,0,.3);text-align:center}
+#gate h1{color:var(--blue);font-size:20px;margin-bottom:4px}#gate h1 span{color:#3a9d23}
+#gate p{color:#667;font-size:13px;margin-bottom:18px}
+#gate input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;text-align:center;margin-bottom:10px}
+#gate button{width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:11px;font-size:15px;font-weight:700;cursor:pointer}
+#gate .err{color:#a8071a;font-size:12.5px;height:16px;margin-top:8px}
+body.locked{overflow:hidden}
+.tabs{display:flex;gap:6px}
+.tab{background:rgba(255,255,255,.12);color:#dfe9f5;border:none;border-radius:8px 8px 0 0;padding:9px 16px;font-size:13.5px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--bg);color:var(--blue)}
+.tab:hover:not(.active){background:rgba(255,255,255,.22)}
+.ptop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.pacts{display:flex;gap:8px;flex-wrap:wrap}
+.cloudstat{font-size:12px;color:#88909c;margin-top:4px}
+.cloudstat.dirty{color:#b45309;font-weight:600}
+.cloudstat.ok{color:#237804;font-weight:600}
+.cloudstat.err{color:#a8071a;font-weight:600}
+.psearch{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+.pcat{margin-top:16px}
+.pcat h3{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#fff;background:var(--blue2);padding:6px 10px;border-radius:6px;display:flex;justify-content:space-between}
+.pcat h3 .cnt{opacity:.8;font-weight:600}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+@media(max-width:700px){.pgrid{grid-template-columns:1fr}}
+.pitem{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.pitem.modi{border-color:#f59e0b;background:#fff7e6}
+.pitem .lab{font-size:12.5px;line-height:1.3}
+.pitem .est{display:inline-block;font-size:10px;font-weight:700;color:#b45309;background:#fff3cd;border:1px solid #ffe69a;border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:middle}
+.pitem input{width:96px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-weight:700;color:#0747a6;background:#eef4fb;flex:none}
+.pitem .unit{font-size:11px;color:#99a;margin-left:4px}
+#addmodal{position:fixed;inset:0;z-index:9998;background:rgba(20,30,45,.55);display:none;align-items:center;justify-content:center;padding:16px}
+#addmodal .box{background:#fff;border-radius:12px;padding:22px;width:100%;max-width:440px;box-shadow:0 18px 50px rgba(0,0,0,.3)}
+#addmodal h3{color:var(--blue);font-size:16px;margin-bottom:10px}
+#addmodal label{display:block;font-size:12px;font-weight:600;color:#44546a;margin:9px 0 3px}
+#addmodal input,#addmodal select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:14px;background:#eef4fb;color:#0747a6;font-weight:600}
+#addmodal .acts{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+#addmodal .err{color:#a8071a;font-size:12.5px;margin-top:8px;min-height:16px}
+#addmodal .ok{color:#237804}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--blue);color:#fff;padding:7px 8px;text-align:left;font-weight:600}
+td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num,th.num{text-align:right;white-space:nowrap}
+tr.sub td{background:#f2f2f2;font-weight:700}
+tr.tot td{background:#c6e0b4;font-weight:700;font-size:14.5px}
+.pct{width:70px;padding:4px 6px;border:1px solid var(--line);border-radius:5px;background:#eef4fb;color:#0747a6;font-weight:600;text-align:right}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+@media(max-width:600px){.kpis{grid-template-columns:1fr}}
+.kpi{background:#fff;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:8px;padding:10px}
+.kpi .l{font-size:11px;color:#667;text-transform:uppercase}.kpi .v{font-size:18px;font-weight:700;color:var(--blue)}
+.btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.note{font-size:11.5px;color:#88909c;margin-top:8px}
+.pa-grp{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--blue);border-bottom:1px solid var(--line);padding-bottom:4px}
+.pa-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 2px;border-bottom:1px dotted #e6eaf0;font-size:13px}
+.pa-row input{width:110px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-weight:700;color:#0747a6;background:#eef4fb}
+.pa-row input.mod{border:2px solid #f59e0b;background:#fff7e6}
+#oferta{display:none}
+@media print{
+ body *{visibility:hidden}
+ #oferta,#oferta *{visibility:visible}
+ #oferta{display:block;position:absolute;left:0;top:0;width:100%;padding:30px;font-size:13px}
+}
+#oferta h1{color:var(--blue);font-size:22px;margin-bottom:2px}
+#oferta .sub{color:#667;margin-bottom:18px}
+#oferta table{margin:14px 0}
+#oferta .final{font-size:18px;font-weight:800;color:var(--blue);margin-top:14px}
+</style>
+</head>
+<body class="locked">
+<div id="gate">
+ <div class="box">
+  <h1>ino<span>SOLAR</span></h1>
+  <p>Calculator oferte — acces intern</p>
+  <input id="gatepw" type="password" placeholder="Parola" autocomplete="off">
+  <button onclick="tryUnlock()">Intra</button>
+  <div class="err" id="gateerr"></div>
+ </div>
+</div>
+<header>
+ <h1>ino<span>SOLAR</span></h1>
+ <nav class="tabs">
+  <button id="tab-oferta" class="tab active" onclick="showTab('oferta')">Ofertare</button>
+  <button id="tab-preturi" class="tab" onclick="askPrices()">Preturi achizitie</button>
+ </nav>
+ <div style="display:flex;align-items:center;gap:10px">
+  <span id="pstat" style="font-size:11px;opacity:.85"></span>
+  <button class="btn" id="pdfbtn" onclick="window.print()">Genereaza PDF oferta</button>
+ </div>
+</header>
+<div class="wrap" id="calcview">
+ <div>
+  <div class="card">
+   <h2>Configurare sistem</h2>
+   <div class="field"><label>1. Putere dorita sistem [kWp] (maxim 27)</label><input type="number" id="kwp" value="8" min="0.5" max="27" step="0.1"></div>
+   <div class="row2">
+    <div class="field"><label>2. Brand panouri</label><select id="pbrand"></select></div>
+    <div class="field"><label>3. Putere si model panou</label><select id="pmodel"></select></div>
+   </div>
+   <div class="row2">
+    <div class="field"><label>4. Putere panou [W]</label><input class="calcv" id="pw" readonly></div>
+    <div class="field"><label>5. Numar panouri</label><input class="calcv" id="npan" readonly></div>
+   </div>
+   <div class="field"><label>6. Putere reala instalata [kWp]</label><input class="calcv" id="preal" readonly></div>
+   <div class="row2">
+    <div class="field"><label>7. Tip bransament</label><select id="tip"><option>Monofazat</option><option selected>Trifazat</option></select></div>
+    <div class="field"><label>8. Brand invertor</label><select id="ibrand"></select></div>
+   </div>
+   <div class="row2">
+    <div class="field"><label>9. Putere invertor [kW]</label><select id="iput"></select></div>
+    <div class="field"><label>10. Brand baterie</label><select id="bbrand"></select></div>
+   </div>
+   <div class="row2">
+    <div class="field"><label>11. Capacitate baterie [kWh]</label><select id="bcap"></select></div>
+    <div class="field"><label>12. Numar baterii</label><input type="number" id="nbat" value="1" min="0" max="20" step="1"></div>
+   </div>
+   <div class="row2">
+    <div class="field"><label>13. Tip montaj</label><select id="montaj"><option>Tigla</option><option>Tabla</option><option>Tabla faltuita</option><option>Plat</option><option>Sol</option></select></div>
+    <div class="field"><label>14. Cablu alimentare [m]</label><input type="number" id="lalim" value="25" min="1"></div>
+   </div>
+   <div class="row2">
+    <div class="field"><label>m cablu solar / panou</label><input type="number" id="mpp" value="4" min="0" step="0.5"></div>
+    <div class="field"><label>15. Cablu solar [m] (auto)</label><input class="calcv" id="lsolar" readonly></div>
+   </div>
+   <div class="field"><label>16. Cablu impamantare [m]</label><input type="number" id="limp" value="25" min="0"></div>
+   <div class="info" id="recom"></div>
+   <div class="verif"><h3>Verificari tehnice</h3><div id="verif"></div></div>
+  </div>
+ </div>
+ <div>
+  <div class="card">
+   <h2>Deviz — pret achizitie</h2>
+   <table id="deviz"></table>
+  </div>
+  <div class="card">
+   <h2>Calcul pret de vanzare</h2>
+   <table id="totals"></table>
+   <div class="kpis">
+    <div class="kpi"><div class="l">Pret/kWp fara TVA</div><div class="v" id="kpi1"></div></div>
+    <div class="kpi"><div class="l">Pret/kWp cu TVA</div><div class="v" id="kpi2"></div></div>
+    <div class="kpi"><div class="l">BC — pondere marfa</div><div class="v" id="kpi3"></div></div>
+   </div>
+   <div class="note">BC = subtotal echipamente si materiale (fara manopera si adaosuri) raportat la pretul de vanzare fara TVA. Preturile provin din catalogul inoSALES; cele estimate trebuie verificate.</div>
+  </div>
+ </div>
+</div>
+
+<div id="adminview" style="display:none;max-width:1280px;margin:0 auto;padding:16px">
+ <div class="card">
+  <div class="ptop">
+   <div>
+    <h2 style="border:0;margin:0;padding:0">Preturi de achizitie <span style="font-weight:400;text-transform:none;color:#88909c">(RON, fara TVA)</span></h2>
+    <div id="cloudstat" class="cloudstat"></div>
+   </div>
+   <div class="pacts">
+    <button class="btn" style="background:#0E7490" onclick="openAdd()">+ Adauga produs</button>
+    <button class="btn" id="savebtn" onclick="saveToBackend()">Salveaza in cloud</button>
+    <button class="btn" style="background:#2E75B6" onclick="loadFromBackend(true)">Reincarca</button>
+    <button class="btn" style="background:#44546a" onclick="exportCsv()">Exporta CSV</button>
+    <button class="btn" style="background:#44546a;padding:10px 12px" title="Sursa CSV (varianta veche)" onclick="setSheetUrl()">&#9881;</button>
+    <button class="btn" style="background:#b54708" onclick="resetOverrides()">Reseteaza local</button>
+   </div>
+  </div>
+  <input id="psearch" class="psearch" placeholder="Cauta produs (ex: Deye, baterie, cablu)..." oninput="renderAdmin()">
+  <div class="note" id="pcount" style="margin:8px 0 4px"></div>
+  <div id="padmin"></div>
+ </div>
+</div>
+
+<div id="addmodal"><div class="box">
+  <h3>Adauga produs nou</h3>
+  <label>Categorie</label>
+  <select id="addcat" onchange="renderAddForm()"></select>
+  <div id="addfields"></div>
+  <div class="err" id="adderr"></div>
+  <div class="acts">
+   <button class="btn" style="background:#44546a" onclick="closeAdd()">Anuleaza</button>
+   <button class="btn" onclick="submitAdd()">Adauga in lista</button>
+  </div>
+ </div></div>
+
+<div id="oferta"></div>
+
+<script>
+const DATA = {"panouri": [["Longi", "Hi-MO 6 Explorer LR5-54HTH — 440W", 440, 290], ["Longi", "Hi-MO X10 LR7-54HVBB dual glass — 470W", 470, 375], ["Longi", "Hi-MO X10 LR7-54HVH — 475W", 475, 380], ["Longi", "Hi-MO X10 LR7-54HVH — 480W", 480, 385], ["Longi", "Hi-MO X10 LR7-54HVH — 485W", 485, 390], ["Longi", "Hi-MO X10 LR7-54HVH — 490W", 490, 390], ["Longi", "Hi-MO X10 LR7-54HVH — 495W", 495, 395], ["Longi", "Hi-MO X10 LR7-54HVH — 500W", 500, 400], ["Longi", "Hi-MO X10 Artist full black — 500W", 500, 400], ["Longi", "Hi-MO X10 Light — 560W", 560, 450], ["Longi", "Hi-MO X10 LR7-72HVH — 630W", 630, 505], ["Longi", "Hi-MO X10 LR7-72HVH — 635W", 635, 510], ["Longi", "Hi-MO X10 LR7-72HVH — 640W", 640, 510], ["Longi", "Hi-MO X10 LR7-72HVH — 645W", 645, 515], ["Longi", "Hi-MO X10 LR7-72HVH — 650W", 650, 520], ["Longi", "Hi-MO X10 Scientist LR7-72HVH — 655W", 655, 525], ["Longi", "Hi-MO X10 Scientist LR7-72HVH — 660W", 660, 530], ["Longi", "Hi-MO 9 — 660W", 660, 530], ["Longi", "Hi-MO X10 Scientist LR7-72HVH — 665W", 665, 530], ["Longi", "Hi-MO X10 Scientist LR7-72HVH — 670W", 670, 535], ["Trina", "Vertex S+ NEG9RC.27 — 450W", 450, 295], ["Trina", "Vertex S+ NEG9R.28 — 460W", 460, 300], ["Trina", "Vertex N NEG18R.28 — 605W", 605, 395], ["Trina", "Vertex N NEG19RC.20 — 625W", 625, 405], ["Trina", "Vertex N NEG21C.20 — 720W", 720, 470], ["Canadian Solar", "CS6R-440 N-type — 440W", 440, 283], ["Canadian Solar", "TOPHiKu6 CS6.1-54TD — 445W", 445, 290], ["Canadian Solar", "TOPHiKu6 CS6.1-54TM All-Black — 445W", 445, 290], ["Canadian Solar", "TOPHiKu6 CS6.1-54TD — 450W", 450, 295], ["Canadian Solar", "TOPHiKu6 CS6.1-54TM All-Black — 450W", 450, 295], ["Canadian Solar", "CS6L-455MS P-type — 455W", 455, 305], ["Canadian Solar", "CS6.1-54TD N-type — 455W", 455, 352], ["Canadian Solar", "TOPHiKu6 CS6.1-54TM All-Black — 455W", 455, 295], ["Canadian Solar", "CS6L-460MS P-type — 460W", 460, 355], ["Canadian Solar", "TOPHiKu6 CS6.1-54TD — 460W", 460, 300], ["Canadian Solar", "TOPHiKu6 CS6.1-54TM All-Black — 460W", 460, 300], ["Canadian Solar", "TOPHiKu6 CS6.1-54TD — 465W", 465, 300], ["Canadian Solar", "TOPHiKu6 CS6.1-54TM All-Black — 465W", 465, 300], ["Canadian Solar", "TOPHiKu6 CS6.1-54TD — 470W", 470, 305], ["Canadian Solar", "TOPHiKu6 CS6.1-54TM All-Black — 470W", 470, 305], ["Canadian Solar", "TOPBiHiKu6 CS6.1-60TB bifacial — 490W", 490, 320], ["Canadian Solar", "TOPBiHiKu6 CS6.1-60TB bifacial — 495W", 495, 320], ["Canadian Solar", "TOPBiHiKu6 CS6.1-60TB bifacial — 500W", 500, 325], ["Canadian Solar", "TOPBiHiKu6 CS6.1-60TB bifacial — 505W", 505, 330], ["Canadian Solar", "TOPBiHiKu6 CS6.1-60TB bifacial — 510W", 510, 330], ["Canadian Solar", "TOPBiHiKu6 CS6.1-60TB bifacial — 515W", 515, 335], ["Canadian Solar", "CS6W-560MS — 560W", 560, 348], ["Canadian Solar", "TOPBiHiKu6 CS6.1-72TB bifacial — 590W", 590, 385], ["Canadian Solar", "TOPBiHiKu6 CS6.1-72TB bifacial — 595W", 595, 385], ["Canadian Solar", "TOPHiKu6 CS6.1-72TD — 600W", 600, 390], ["Canadian Solar", "TOPBiHiKu6 CS6.1-72TB bifacial — 600W", 600, 390], ["Canadian Solar", "TOPHiKu6 CS6.1-72TD — 605W", 605, 395], ["Canadian Solar", "TOPBiHiKu6 CS6.1-72TB bifacial — 605W", 605, 395], ["Canadian Solar", "TOPHiKu6 CS6.1-72TD — 610W", 610, 395], ["Canadian Solar", "TOPBiHiKu6 CS6.1-72TB bifacial — 610W", 610, 395], ["Canadian Solar", "TOPHiKu6 CS6.1-72TD — 615W", 615, 400], ["Canadian Solar", "TOPBiHiKu6 CS6.1-72TB bifacial — 615W", 615, 400], ["Canadian Solar", "TOPHiKu6 CS6.1-72TD — 620W", 620, 405], ["Canadian Solar", "TOPBiHiKu6 CS6.1-72TB bifacial — 620W", 620, 405], ["Canadian Solar", "TOPHiKu6 CS6.1-72TD — 625W", 625, 405], ["Canadian Solar", "TOPHiKu6 CS6.1-72TD — 630W", 630, 410], ["Canadian Solar", "TOPBiHiKu7 CS7N-TB-AG bifacial — 700W", 700, 455], ["Jinko", "Tiger Neo 48HL4M-DB All-Black — 475W", 475, 310], ["Jinko", "Tiger Neo 60HL4-(V) — 500W", 500, 325], ["Jinko", "Tiger Neo 72HL4-(V) — 590W", 590, 385], ["Jinko", "Tiger Neo 3.0 — 635W", 635, 415], ["Aiko", "Neostar 2S ABC 54 celule — 460W", 460, 370], ["Aiko", "Neostar 3 ABC — 485W", 485, 390], ["Aiko", "Comet 3N+72e ABC dual glass — 645W", 645, 515], ["Aiko", "Comet 3N72e ABC — 670W", 670, 535], ["Astronergy", "ASTRO N7s 2.0 48 celule — 450W", 450, 295], ["Astronergy", "ASTRO N7s 2.0 bifacial Black — 470W", 470, 305], ["Astronergy", "ASTRO N7 2.0 — 650W", 650, 425], ["Astronergy", "ASTRO N7 Pro — 670W", 670, 435], ["Astronergy", "ASTRO N8 66 celule bifacial — 720W", 720, 470], ["Tongwei", "TWMND-72HS — 580W", 580, 375], ["Tongwei", "TWMND-72HD bifacial — 600W", 600, 390], ["Tongwei", "TWMNH-66HD — 725W", 725, 470]], "invertoare": [["Huawei", "Monofazat", 3, "SUN2000-3KTL-LB0", 2800], ["Huawei", "Monofazat", 4, "SUN2000-4KTL-LB0", 3400], ["Huawei", "Monofazat", 5, "SUN2000-5KTL-LB0", 3650], ["Huawei", "Monofazat", 6, "SUN2000-6KTL-LB0", 4100], ["Huawei", "Monofazat", 8, "SUN2000-8KTL-LC0", 5600], ["Huawei", "Monofazat", 10, "SUN2000-10KTL-LC0", 6100], ["Huawei", "Trifazat", 3, "SUN2000-3KTL-M1", 3300], ["Huawei", "Trifazat", 4, "SUN2000-4KTL-M1", 3500], ["Huawei", "Trifazat", 5, "SUN2000-5KTL-M1", 3700], ["Huawei", "Trifazat", 6, "SUN2000-6KTL-M1", 3950], ["Huawei", "Trifazat", 8, "SUN2000-8KTL-M1", 4000], ["Huawei", "Trifazat", 10, "SUN2000-10KTL-M1", 4750], ["Huawei", "Trifazat", 12, "SUN2000-12KTL-M5", 6500], ["Huawei", "Trifazat", 15, "SUN2000-15KTL-M5", 7900], ["Huawei", "Trifazat", 17, "SUN2000-17KTL-M5", 7000], ["Huawei", "Trifazat", 20, "SUN2000-20K-MB0", 10600], ["Huawei", "Trifazat", 25, "SUN2000-25KTL-M5", 9300], ["Deye", "Monofazat", 3.6, "SUN-3.6KW-LP1", 3900], ["Deye", "Monofazat", 5, "SUN-5KW-LP1", 3800], ["Deye", "Monofazat", 6, "SUN-6KW-LP1", 3500], ["Deye", "Monofazat", 8, "SUN-8KW-LP1", 5100], ["Deye", "Monofazat", 10, "SUN-10KW-SG02LP1", 7000], ["Deye", "Monofazat", 12, "SUN-12K-SG01LP1-EU", 8200], ["Deye", "Monofazat", 16, "SUN-16K-SG01LP1-EU", 10000], ["Deye", "Trifazat", 5, "SUN-5KW-LP3", 6250], ["Deye", "Trifazat", 6, "SUN-6KW-LP3", 6900], ["Deye", "Trifazat", 8, "SUN-8KW-LP3", 7200], ["Deye", "Trifazat", 10, "SUN-10KW-LP3", 7250], ["Deye", "Trifazat", 12, "SUN-12KW-LP3", 7800], ["Deye", "Trifazat", 15, "SUN-15K-SG05LP3", 9000], ["Deye", "Trifazat", 20, "SUN-20K-SG05LP3", 12100], ["Deye", "Trifazat", 25, "SUN-25K-SG01HP3 (HV)", 10500], ["Deye", "Trifazat", 30, "SUN-30K-SG01HP3 (HV)", 14200], ["Solis", "Monofazat", 3, "Solis Hybrid mono 3kW", 3390], ["Solis", "Monofazat", 3.6, "Solis Hybrid mono 3.6kW", 3510], ["Solis", "Monofazat", 5, "Solis Hybrid mono 5kW", 3700], ["Solis", "Monofazat", 6, "Solis Hybrid mono 6kW", 3310], ["Solis", "Monofazat", 8, "Solis Hybrid mono 8kW", 4950], ["Solis", "Trifazat", 8, "Solis Hybrid LV trifazat 8kW", 7400], ["Solis", "Trifazat", 10, "Solis Hybrid LV trifazat 10kW", 7700], ["Solis", "Trifazat", 12, "Solis Hybrid LV trifazat 12kW", 7900], ["Solis", "Trifazat", 15, "Solis Hybrid LV trifazat 15kW", 8750], ["Sigenergy", "Monofazat", 3, "Sigen Hybrid 3.0 SP2", 2300], ["Sigenergy", "Monofazat", 3.6, "Sigen Hybrid 3.6 SP2", 2400], ["Sigenergy", "Monofazat", 4, "Sigen Hybrid 4.0 SP2", 2450], ["Sigenergy", "Monofazat", 4.6, "Sigen Hybrid 4.6 SP2", 2500], ["Sigenergy", "Monofazat", 5, "Sigen Hybrid 5.0 SP2", 2550], ["Sigenergy", "Monofazat", 6, "Sigen Hybrid 6.0 SP2", 2600], ["Sigenergy", "Trifazat", 3, "Sigen Hybrid 3.0 TP2", 3300], ["Sigenergy", "Trifazat", 4, "Sigen Hybrid 4.0 TP2", 3350], ["Sigenergy", "Trifazat", 5, "Sigen Hybrid 5.0 TP2", 3400], ["Sigenergy", "Trifazat", 6, "Sigen Hybrid 6.0 TP2", 3900], ["Sigenergy", "Trifazat", 8, "Sigen Hybrid 8.0 TP2", 4150], ["Sigenergy", "Trifazat", 10, "Sigen Hybrid 10.0 TP2", 4500], ["Sigenergy", "Trifazat", 12, "Sigen Hybrid 12.0 TP2", 4600]], "baterii": [["Uhome", 5.12, "Uhome 5000B 5.12 kWh (LV)", 2900], ["Uhome", 14.33, "LifePO4 UHOME 14.33 kWh (LV)", 6500], ["Uhome", 16, "Uhome 16 kWh (LV)", 6500], ["Hailei", 15, "Hailei 15 kWh LV celule EVE IP66", 6500], ["Hailei", 16, "Hailei 16 kWh IP65 LV51314H", 6700], ["Huawei Luna", 5, "LUNA2000-5-E0 + Power Module C0", 11900], ["Huawei Luna", 10, "2 x LUNA2000-5-E0 + Power Module C0", 20300], ["Huawei Luna", 15, "3 x LUNA2000-5-E0 + Power Module C0", 28700], ["Deye", 5.12, "LifePO4 SE-G5.1 PRO-B (LV)", 3800], ["Deye", 10.24, "2 x LifePO4 SE-G5.1 PRO-B (LV)", 7600], ["Deye", 16, "LiFePO4 RW-F 16 kWh 51.2V (LV)", 8600], ["SigenStor", 6, "SigenStor BAT 6.0", 9200], ["SigenStor", 10, "SigenStor BAT 10.0", 11800], ["SigenStor", 12, "2 x SigenStor BAT 6.0", 18400], ["SigenStor", 20, "2 x SigenStor BAT 10.0", 23600], ["Dyness", 5, "Dyness DL5.0C 5 kWh", 3500], ["Dyness", 5.12, "Dyness PowerDepot G2 5.12 kWh", 3600], ["Dyness", 10.24, "Dyness PowerBox G2 10.24 kWh", 6400], ["Dyness", 14.33, "Dyness PowerBrick 14.33 kWh", 7800], ["Dyness", 16, "Dyness PowerBrick PLUS 16 kWh IP65", 8700], ["Fara baterie", 0, "-", 0]], "smartmeter": {"Huawei|Monofazat": ["Huawei DDSU666-H", 330], "Huawei|Trifazat": ["Huawei DTSU666-H 100A", 560], "Deye|Monofazat": ["Eastron SDM230 Modbus", 220], "Deye|Trifazat": ["Eastron SDM630 Modbus", 350], "Solis|Monofazat": ["Eastron SDM230 Modbus (estimat)", 220], "Solis|Trifazat": ["Eastron SDM630 Modbus (estimat)", 350], "Sigenergy|Monofazat": ["Sigen Gateway HomePro SP", 2300], "Sigenergy|Trifazat": ["Sigen Gateway Home TP 30K", 2200]}, "acc": {"TABLOU_AC|Monofazat": ["Tablou protectie AC monofazat (18 module)", 87], "TABLOU_AC|Trifazat": ["Tablou protectie AC trifazat (24 module)", 129], "TABLOU_DC|Monofazat": ["Tablou protectie DC (12 module)", 120], "TABLOU_DC|Trifazat": ["Tablou protectie DC (12 module)", 120], "COFRET|Monofazat": ["Cofret contor echipat cu 1 siguranta (ramane gol pt. contorul de productie montat de distributie)", 107], "COFRET|Trifazat": ["Cofret contor echipat cu 1 siguranta (ramane gol pt. contorul de productie montat de distributie)", 159], "SIGURANTE|Monofazat": ["Set sigurante + descarcatoare AC/DC (estimat)", 150], "SIGURANTE|Trifazat": ["Set sigurante + descarcatoare AC/DC (estimat)", 300], "BMP|Monofazat": ["BMP monofazat", 95], "BMP|Trifazat": ["BMP trifazat", 180]}, "ats": [["Monofazat", 63, "ATS 2P 63A monofazat", 225], ["Monofazat", 999, "ATS 2P >63A (estimat - de verificat)", 450], ["Trifazat", 63, "ATS 4P 63A trifazat", 300], ["Trifazat", 999, "ATS 4P >63A Socomec/Suntree (pret in functie de amperaj - de verificat)", 1500]], "alte": {"solar6": 4.5, "myf10": 5, "myf16": 5, "mc4": 10, "canal": 40, "copex": 50}, "cabluri": {"Monofazat|4 mm²": ["CYY-F 3x4", 6.55], "Monofazat|6 mm²": ["CYY-F 3x6", 9.7], "Monofazat|10 mm²": ["RV-K 3x10", 26.71], "Monofazat|16 mm²": ["Cupru 3x16 (estimat)", 38], "Trifazat|2.5 mm²": ["Cupru 5x2.5 (estimat)", 7.5], "Trifazat|4 mm²": ["CYY-F 5x4", 10.5], "Trifazat|6 mm²": ["CYY-F 5x6", 14.8], "Trifazat|10 mm²": ["RV-K 5x10", 30.35], "Trifazat|16 mm²": ["RV-K 5x16", 48.53], "Trifazat|25 mm²": ["Cupru 5x25 (estimat)", 75]}, "dim": [["Monofazat", 3, 13.3, "4 mm²", "4 mm²", "16 A"], ["Monofazat", 4, 17.7, "4 mm²", "4 mm²", "20 A"], ["Monofazat", 5, 22.2, "6 mm²", "6 mm²", "25 A"], ["Monofazat", 6, 26.6, "6 mm²", "10 mm²", "32 A"], ["Monofazat", 8, 32, "10 mm²", "10 mm²", "40 A"], ["Monofazat", 10, 45, "16 mm²", "16 mm²", "50 A"], ["Trifazat", 3, 4.4, "4 mm²", "4 mm²", "10 A"], ["Trifazat", 4, 5.9, "4 mm²", "4 mm²", "10 A"], ["Trifazat", 5, 7.4, "4 mm²", "4 mm²", "10 A"], ["Trifazat", 6, 8.8, "4 mm²", "4 mm²", "16 A"], ["Trifazat", 8, 11.8, "4 mm²", "4 mm²", "16 A"], ["Trifazat", 10, 14.7, "4 mm²", "4 mm²", "20 A"], ["Trifazat", 12, 17.7, "4 mm²", "4 mm²", "25 A"], ["Trifazat", 15, 22.1, "4 mm²", "4 mm²", "32 A"], ["Trifazat", 20, 29.5, "10 mm²", "10 mm²", "40 A"], ["Trifazat", 25, 36.8, "10 mm²", "10 mm²", "40 A"], ["Trifazat", 27, 39.8, "10 mm²", "10 mm²", "50 A"], ["Trifazat", 30, 44.2, "16 mm²", "16 mm²", "50 A"], ["Trifazat", 33, 48.6, "16 mm²", "16 mm²", "63 A"], ["Trifazat", 36, 53, "16 mm²", "16 mm²", "63 A"], ["Trifazat", 40, 58.9, "16 mm²", "25 mm²", "80 A"], ["Trifazat", 50, 73.6, "25 mm²", "35 mm²", "100 A"], ["Trifazat", 60, 88.4, "35 mm²", "50 mm²", "125 A"], ["Trifazat", 80, 117.8, "50 mm²", "70 mm²", "160 A"], ["Trifazat", 100, 147.3, "70 mm²", "95 mm²", "200 A"], ["Trifazat", 115, 169.4, "95 mm²", "120 mm²", "250 A"], ["Trifazat", 150, 220.9, "120 mm²", "150 mm²", "315 A"], ["Trifazat", 200, 294.6, "150 mm²", "150 mm²", "400 A"]], "structuraP": {"Surub": 0.5, "Prezon": 2.3, "Profil L": 2.3, "Sina": 14, "Minirail": 14, "Carlig tigla": 11, "Tripod (Z)": 60, "Contragreutate (spalier 2.6 m)": 40, "Clema RCB": 2.5, "Clema tabla faltuita": 5, "Carlig tabla Gerard": 73, "Clema prindere mijloc": 1.5, "Clema prindere capat": 1.7, "SolarSpeed backplate (contravantuire)": 38, "Modul structura sol (10 panouri)": 2400}, "manopera": [[0, 1, 3000], [10, 1, 3500], [12, 1, 3500], [15, 1, 4000], [15.5, 2, 6000]]};
+/* ======================= CONFIGURARE (editati aici) =======================
+   1) SHEET_URL: lipiti intre ghilimele linkul CSV publicat din Google Sheets
+      (File -> Share -> Publish to web -> fila "Preturi" -> format .csv).
+      Cand e completat, calculatorul ia preturile LIVE din Sheet la fiecare
+      deschidere si la fiecare ~10 minute. Lasati gol = preturi incorporate.
+   2) ACCESS_PASSWORD: parola ceruta la intrarea in calculator. Schimbati-o
+      oricand, e suficient sa modificati textul dintre ghilimele si sa reincarcati
+      fisierul pe gazduire.
+   =========================================================================== */
+const SHEET_URL = '';            // optional: link CSV publicat (sursa veche). Daca folositi BACKEND_URL, lasati gol.
+const ACCESS_PASSWORD = '';   // parola dezactivata temporar pt testare (era 'InoSolar#2026')
+/* --- BACKEND prețuri (Google Apps Script) — recomandat pentru editare live ---
+   BACKEND_URL: lipiti "Web app URL" din deploy-ul Apps Script (vezi fisierul .gs).
+                Cand e completat, aplicatia ia preturile de aici si achizitiile pot salva live.
+   WRITE_TOKEN: acelasi token ca in Apps Script (pentru salvarea preturilor).
+   PRICES_PASSWORD: parola pentru tabul "Preturi achizitie" (doar achizitiile). Gol = fara parola. */
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbz8emwt-CsIXH1ljA-5fYIUvhbSVVD0AvK2CeYkaU6UVKhLSv_Re8PA5alnuZSJn1C1Rw/exec';
+const WRITE_TOKEN = 'ino-pret-9f3kQ7';  // acelasi token ca in Apps Script
+const PRICES_PASSWORD = '';               // parola dezactivata temporar pt testare (era 'achizitii')
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString('ro-RO',{minimumFractionDigits:2, maximumFractionDigits:2});
+const PCT_DEFAULT = {adaos:30, online:5.5, cazare:3, neprev:3, tva:21};
+let pct = {...PCT_DEFAULT};
+
+function uniq(a){return [...new Set(a)]}
+function fillSelect(sel, items, keep){
+  const old = sel.value; sel.innerHTML='';
+  items.forEach(v=>{const o=document.createElement('option');o.textContent=v;o.value=v;sel.appendChild(o)});
+  if(keep && items.includes(old)) sel.value = old;
+}
+function initSelectors(){
+  fillSelect($('pbrand'), uniq(DATA.panouri.map(p=>p[0])));
+  $('pbrand').value='Canadian Solar';
+  refreshPModels(); refreshIput(); refreshBcap();
+  fillSelect($('ibrand'), uniq(DATA.invertoare.map(i=>i[0])));
+  $('ibrand').value='Deye'; refreshIput();
+  refreshBbrand();
+  if(allowedBatBrands().includes('Hailei')) $('bbrand').value='Hailei';
+  refreshBcap();
+}
+function refreshPModels(){
+  fillSelect($('pmodel'), DATA.panouri.filter(p=>p[0]===$('pbrand').value).map(p=>p[1]), true);
+}
+function refreshIput(){
+  const list = DATA.invertoare.filter(i=>i[0]===$('ibrand').value && i[1]===$('tip').value).map(i=>i[2]);
+  fillSelect($('iput'), list, true);
+  if(!list.length){$('iput').innerHTML='<option value="">— indisponibil —</option>'}
+}
+function allowedBatBrands(){
+  const ib = $('ibrand').value;
+  if(ib==='Huawei') return ['Huawei Luna','Fara baterie'];
+  if(ib==='Sigenergy') return ['SigenStor','Fara baterie'];
+  return uniq(DATA.baterii.map(b=>b[0])).filter(b=>b!=='Huawei Luna'&&b!=='SigenStor');
+}
+function refreshBbrand(){
+  fillSelect($('bbrand'), allowedBatBrands(), true);
+}
+function refreshBcap(){
+  fillSelect($('bcap'), DATA.baterii.filter(b=>b[0]===$('bbrand').value).map(b=>b[2-1]), true);
+}
+function dimRow(tip, kw){
+  const rows = DATA.dim.filter(r=>r[0]===tip);
+  for(const r of rows){ if(r[1]>=kw) return r; }
+  return rows[rows.length-1];
+}
+function structura(montaj, N, P){
+  const cm=(N-1)*2*P['Clema prindere mijloc'], cc=12*P['Clema prindere capat'];
+  switch(montaj){
+    case 'Tigla': return 3.2*N*P['Sina']+2.6*N*P['Carlig tigla']+cm+cc;
+    case 'Tabla': return 3.5*N*(P['Profil L']+P['Surub'])+3.2*N*P['Sina']+cm+cc;
+    case 'Tabla faltuita': return 3.2*N*P['Sina']+2.5*N*P['Clema tabla faltuita']+3.5*N*P['Profil L']+cm+cc;
+    case 'Plat': return 2.2*N*P['Tripod (Z)']+4.8*N*P['Sina']+4.4*N*P['Clema RCB']+0.43*N*P['Contragreutate (spalier 2.6 m)']+N*P['SolarSpeed backplate (contravantuire)']+cm+cc;
+    case 'Sol': return Math.ceil(N/10)*P['Modul structura sol (10 panouri)'];
+  }
+}
+function calc(){
+  let kwp = parseFloat($('kwp').value)||0;
+  if(kwp>27){kwp=27;$('kwp').value=27}
+  const tip=$('tip').value, brand=$('pbrand').value, model=$('pmodel').value;
+  const pan = DATA.panouri.find(p=>p[1]===model) || [brand,'',0,0];
+  const W=pan[2], prPan=pan[3];
+  const N = W? Math.ceil(kwp*1000/W):0;
+  const real = N*W/1000;
+  $('pw').value=W; $('npan').value=N; $('preal').value=real.toFixed(2);
+  const mpp=parseFloat($('mpp').value)||0, lsolar=N*mpp; $('lsolar').value=lsolar;
+  const lalim=parseFloat($('lalim').value)||0, limp=parseFloat($('limp').value)||0;
+
+  const inv = DATA.invertoare.find(i=>i[0]===$('ibrand').value && i[1]===tip && i[2]==$('iput').value) || ['','',0,'— selectati —',0];
+  const bat = DATA.baterii.find(b=>b[0]===$('bbrand').value && b[2-1]==$('bcap').value) || ['',0,'—',0];
+  const nbat = Math.max(0, Math.round(parseFloat($('nbat').value)||0));
+  const sm = DATA.smartmeter[$('ibrand').value+'|'+tip] || ['-',0];
+
+  const dr = dimRow(tip, kwp);
+  const sect = lalim<=50 ? dr[3] : dr[4];
+  const cab = DATA.cabluri[tip+'|'+sect] || ['COMPLETATI CATALOGUL',0];
+  const fuse = dr[5];
+  const dri = dimRow(tip, parseFloat($('iput').value)||0);
+  const amps = dri[2];
+  const atsRows = DATA.ats.filter(a=>a[0]===tip);
+  const atsSel = amps<=atsRows[0][1] ? atsRows[0] : atsRows[1];
+  const imp = kwp<=15 ? ['Cablu impamantare MYF 10 mm² (galben-verde)',DATA.alte.myf10] : ['Cablu impamantare MYF 16 mm² (galben-verde)',DATA.alte.myf16];
+  const str = structura($('montaj').value, N, DATA.structuraP);
+  const A=k=>DATA.acc[k+'|'+tip];
+  let man=[1,0]; for(const m of DATA.manopera){ if(kwp>=m[0]) man=[m[1],m[2]]; }
+
+  $('recom').innerHTML = `<b>Recomandari dimensionare:</b> sectiune cablu alimentare (Cu): <b>${sect}</b> &nbsp;|&nbsp; ${cab[0]} &nbsp;|&nbsp; siguranta: <b>${fuse}</b> &nbsp;|&nbsp; curent invertor: <b>${amps} A</b>`;
+
+  // --- Verificari tehnice ---
+  const invKw = parseFloat($('iput').value)||0;
+  const ratio = invKw ? real/invKw : 0;
+  let vInv;
+  if(!invKw) vInv = {c:'neutral', t:'Selectati puterea invertorului.'};
+  else if(ratio>1.35) vInv = {c:'warn', t:`⚠ Invertor SUBDIMENSIONAT (raport DC/AC ${ratio.toFixed(2)}): ${real.toFixed(1)} kWp panouri pe invertor de ${invKw} kW. Alege un invertor mai mare.`};
+  else if(ratio<0.70) vInv = {c:'warn', t:`⚠ Invertor SUPRADIMENSIONAT (raport DC/AC ${ratio.toFixed(2)}): cost invertor inutil de mare fata de panouri.`};
+  else vInv = {c:'ok', t:`✓ Invertor dimensionat corect (raport DC/AC ${ratio.toFixed(2)}; optim 1.0–1.3).`};
+
+  const invModel = inv[3]||'';
+  const isHV = /\(HV\)|HP3/i.test(invModel);
+  const noBat = $('bbrand').value==='Fara baterie' || nbat<=0 || bat[3]<=0;
+  let vBat;
+  if(noBat) vBat = {c:'neutral', t:'— fara baterie —'};
+  else if(isHV) vBat = {c:'warn', t:`⚠ INCOMPATIBIL: invertorul HV (${invModel}) necesita baterie de inalta tensiune (HV). Bateriile LV din catalog nu sunt compatibile.`};
+  else vBat = {c:'ok', t:'✓ Baterie compatibila cu invertorul.'};
+
+  const estSrc = [sm[0], cab[0], atsSel[2], imp[0]].join('|').toLowerCase();
+  const hasEst = estSrc.includes('estimat') || estSrc.includes('verificat');
+  const vEst = hasEst
+    ? {c:'warn', t:'⚠ Configuratia contine preturi ESTIMATE / de verificat (smart meter, cablu, ATS sau impamantare). Confirma preturile inainte de a trimite oferta.'}
+    : {c:'ok', t:'✓ Preturile principale din configuratie sunt confirmate.'};
+
+  $('verif').innerHTML = [vInv,vBat,vEst].map(v=>`<div class="v ${v.c}">${v.t}</div>`).join('');
+
+  const rows = [
+   ['Panouri fotovoltaice', brand+' '+model, N, 'buc', prPan],
+   ['Invertor', inv[3], 1, 'buc', inv[4]],
+   ['Baterie', bat[2], nbat, 'buc', bat[3]],
+   ['Structura montaj', 'Montaj '+$('montaj').value, 1, 'set', str],
+   ['Cablu alimentare', cab[0]+' ('+sect+')', lalim, 'm', cab[1]],
+   ['Cablu solar', 'Cablu solar 6 mm²', lsolar, 'm', DATA.alte.solar6],
+   ['Cablu impamantare', imp[0], limp, 'm', imp[1]],
+   ['ATS', atsSel[2], 1, 'buc', atsSel[3]],
+   ['Tablou protectie AC', A('TABLOU_AC')[0], 1, 'buc', A('TABLOU_AC')[1]],
+   ['Tablou protectie DC', A('TABLOU_DC')[0], 1, 'buc', A('TABLOU_DC')[1]],
+   ['Cofret contor', A('COFRET')[0], 1, 'buc', A('COFRET')[1]],
+   ['Sigurante + descarcatoare', A('SIGURANTE')[0], 1, 'set', A('SIGURANTE')[1]],
+   ['BMP', A('BMP')[0], 1, 'buc', A('BMP')[1]],
+   ['Smart meter', sm[0], 1, 'buc', sm[1]],
+   ['Conectori MC4', 'Pereche conectori MC4', 2, 'buc', DATA.alte.mc4],
+   ['Canal cablu', 'Bara 4 m', 1, 'buc', DATA.alte.canal],
+   ['Copex', 'Rola 50 m', 1, 'buc', DATA.alte.copex],
+  ];
+  const subtotal = rows.reduce((s,r)=>s+r[2]*r[4],0);
+  let h = '<tr><th>Componenta</th><th>Detaliu</th><th class="num">Cant.</th><th>UM</th><th class="num">Pret unitar</th><th class="num">Total</th></tr>';
+  rows.forEach(r=>{const est=/estimat|verificat/i.test(r[1]); const flag=est?' <span class="estflag" title="Pret estimat / de verificat">⚠</span>':''; h+=`<tr><td><b>${r[0]}</b></td><td>${r[1]}${flag}</td><td class="num">${r[2]}</td><td>${r[3]}</td><td class="num">${fmt(r[4])}</td><td class="num">${fmt(r[2]*r[4])}</td></tr>`});
+  h += `<tr class="sub"><td colspan="5">Subtotal echipamente si materiale</td><td class="num">${fmt(subtotal)}</td></tr>`;
+  h += `<tr><td><b>Manopera montaj</b></td><td>Manopera (${man[0]} ${man[0]==1?'zi':'zile'})</td><td class="num">1</td><td>lucrare</td><td class="num">${fmt(man[1])}</td><td class="num">${fmt(man[1])}</td></tr>`;
+  const total = subtotal+man[1];
+  h += `<tr class="tot"><td colspan="5">TOTAL PRET ACHIZITIE (fara TVA)</td><td class="num">${fmt(total)}</td></tr>`;
+  $('deviz').innerHTML = h;
+
+  const adaosV = total*pct.adaos/100, cuAdaos = total+adaosV;
+  const onlineV=cuAdaos*pct.online/100, cazareV=cuAdaos*pct.cazare/100, neprevV=cuAdaos*pct.neprev/100;
+  const vanz = cuAdaos+onlineV+cazareV+neprevV;
+  const tvaV = vanz*pct.tva/100, vanzTva = vanz+tvaV;
+  const pr=(l,id,v,amt,bold)=>`<tr${bold?' class="sub"':''}><td>${l}</td><td class="num"><input class="pct" id="${id}" value="${v}" onchange="setPct('${id}',this.value)"> %</td><td class="num">${fmt(amt)}</td></tr>`;
+  let t = `<tr><th>Element</th><th class="num">Procent</th><th class="num">Valoare (RON)</th></tr>`;
+  t += `<tr class="sub"><td>TOTAL PRET ACHIZITIE (fara TVA)</td><td></td><td class="num">${fmt(total)}</td></tr>`;
+  t += pr('Adaos comercial','adaos',pct.adaos,adaosV);
+  t += `<tr class="sub"><td>Pret cu adaos (fara TVA)</td><td></td><td class="num">${fmt(cuAdaos)}</td></tr>`;
+  t += pr('% plata on-line','online',pct.online,onlineV);
+  t += pr('Cazare - combustibil','cazare',pct.cazare,cazareV);
+  t += pr('Neprevazut','neprev',pct.neprev,neprevV);
+  t += `<tr class="tot"><td>PRET DE VANZARE FINAL (fara TVA)</td><td></td><td class="num">${fmt(vanz)}</td></tr>`;
+  t += pr('TVA','tva',pct.tva,tvaV);
+  t += `<tr class="tot"><td>PRET DE VANZARE FINAL (cu TVA)</td><td></td><td class="num">${fmt(vanzTva)}</td></tr>`;
+  $('totals').innerHTML = t;
+  $('kpi1').textContent = real? fmt(vanz/real)+' RON':'—';
+  $('kpi2').textContent = real? fmt(vanzTva/real)+' RON':'—';
+  $('kpi3').textContent = vanz? (100*subtotal/vanz).toFixed(1)+' %':'—';
+
+  // oferta print
+  const today = new Date().toLocaleDateString('ro-RO');
+  let of = `<h1>ino<span style="color:#3a9d23">SOLAR</span> — Oferta sistem fotovoltaic</h1>
+  <div class="sub">Data: ${today}</div>
+  <p><b>Sistem propus:</b> ${real.toFixed(2)} kWp — ${N} x ${model} (${brand}), invertor ${inv[3]} (${tip.toLowerCase()}), ${bat[3]>0&&nbat>0? 'stocare '+nbat+' x '+$('bcap').value+' kWh ('+bat[2]+'),':''} montaj pe ${$('montaj').value.toLowerCase()}.</p>
+  <table><tr><th>Componenta</th><th>Detaliu</th><th class="num">Cantitate</th></tr>`;
+  rows.filter(r=>r[4]>0||r[0]==='Baterie'&&bat[3]>0).forEach(r=>{ if(r[0]==='Baterie'&&bat[3]==0)return; of+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]} ${r[3]}</td></tr>`});
+  of += `<tr><td>Manopera montaj</td><td>Instalare completa si punere in functiune</td><td class="num">1 lucrare</td></tr></table>
+  <div class="final">Pret total: ${fmt(vanzTva)} RON (cu TVA ${pct.tva}%)</div>
+  <div>Pret fara TVA: ${fmt(vanz)} RON &nbsp;|&nbsp; ${real? fmt(vanzTva/real):'—'} RON/kWp (cu TVA)</div>
+  <p style="margin-top:16px;color:#667;font-size:11px">Oferta orientativa, valabila 15 zile. Nu include taxe de avizare/racordare. Configuratia finala se stabileste dupa vizita tehnica.</p>`;
+  $('oferta').innerHTML = of;
+}
+function setPct(id, v){ pct[id]=parseFloat(String(v).replace(',','.'))||0; calc(); }
+['kwp','lalim','limp','mpp','nbat'].forEach(id=>$(id).addEventListener('input',calc));
+$('pbrand').addEventListener('change',()=>{refreshPModels();calc()});
+$('pmodel').addEventListener('change',calc);
+$('tip').addEventListener('change',()=>{refreshIput();calc()});
+window.setSheetUrl = function(){
+  const cur = localStorage.getItem('sheetUrl')||SHEET_URL||'';
+  const u = prompt('Lipiti URL-ul CSV publicat din Google Sheets (File \u2192 Share \u2192 Publish to web \u2192 CSV).\nLasati gol pentru a reveni la preturile incorporate.', cur);
+  if(u===null) return;
+  if(u.trim()) localStorage.setItem('sheetUrl',u.trim()); else localStorage.removeItem('sheetUrl');
+  location.reload();
+};
+$('ibrand').addEventListener('change',()=>{refreshIput();refreshBbrand();refreshBcap();calc()});
+$('iput').addEventListener('change',calc);
+$('bbrand').addEventListener('change',()=>{refreshBcap();calc()});
+$('bcap').addEventListener('change',calc);
+$('montaj').addEventListener('change',calc);
+function parseCSV(text){
+  const rows=[]; let row=[], cur='', q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){ if(ch==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=ch; }
+    else if(ch==='"') q=true;
+    else if(ch===','){ row.push(cur); cur=''; }
+    else if(ch==='\n'||ch==='\r'){ if(cur!==''||row.length){row.push(cur);rows.push(row);row=[];cur='';} if(ch==='\r'&&text[i+1]==='\n')i++; }
+    else cur+=ch;
+  }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);}
+  return rows;
+}
+function num(v){
+  v=String(v).trim().replace(/\s/g,'');
+  if(v.includes('.')&&v.includes(',')) v=v.replace(/\./g,'').replace(',','.');
+  else v=v.replace(',','.');
+  return parseFloat(v)||0;
+}
+function applyCsv(text){ applyRows(parseCSV(text)); }
+function applyRows(rows){
+  const P=[],I=[],B=[],SM={},AC={},AT=[],CB={},ST={},MN=[],AL={};
+  const S=v=>String(v==null?'':v).trim();
+  for(const r of rows){
+    const cat=S(r[0]).toUpperCase();
+    const c1=S(r[1]), c2=S(r[2]), c3=S(r[3]), den=S(r[4]), pret=num(r[5]);
+    if(cat==='PANOU') P.push([c1,c2,num(c3),pret]);
+    else if(cat==='INVERTOR') I.push([c1,c2,num(c3),den,pret]);
+    else if(cat==='BATERIE') B.push([c1,num(c2),den,pret]);
+    else if(cat==='SMARTMETER') SM[c1+'|'+c2]=[den,pret];
+    else if(cat==='ACCESORIU') AC[c1+'|'+c2]=[den,pret];
+    else if(cat==='ATS') AT.push([c1,num(c2),den,pret]);
+    else if(cat==='CABLU') CB[c1+'|'+c2]=[den,pret];
+    else if(cat==='ALTE') AL[c1]=pret;
+    else if(cat==='STRUCTURA') ST[c1]=pret;
+    else if(cat==='MANOPERA') MN.push([num(c1),num(c2),pret]);
+  }
+  if(P.length) DATA.panouri=P;
+  if(I.length) DATA.invertoare=I;
+  if(B.length) DATA.baterii=B;
+  if(Object.keys(SM).length) DATA.smartmeter=SM;
+  if(Object.keys(AC).length) DATA.acc=AC;
+  if(AT.length) DATA.ats=AT;
+  if(Object.keys(CB).length) DATA.cabluri=CB;
+  if(Object.keys(AL).length) Object.assign(DATA.alte,AL);
+  if(Object.keys(ST).length) DATA.structuraP=ST;
+  if(MN.length) DATA.manopera=MN.sort((a,b)=>a[0]-b[0]);
+}
+async function loadLive(){
+  const url = localStorage.getItem('sheetUrl')||SHEET_URL;
+  if(!url){ $('pstat').textContent='Preturi: versiune incorporata'; return; }
+  try{
+    const r = await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(), {cache:'no-store'});
+    if(!r.ok) throw new Error(r.status);
+    applyCsv(await r.text());
+    applyOverrides();
+    fillSelect($('pbrand'), uniq(DATA.panouri.map(p=>p[0])), true);
+    refreshPModels(); fillSelect($('ibrand'), uniq(DATA.invertoare.map(i=>i[0])), true);
+    refreshIput(); refreshBbrand(); refreshBcap();
+    const now=new Date().toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
+    $('pstat').textContent='Preturi: LIVE \u2713 (actualizat '+now+')';
+    calc();
+  }catch(e){
+    $('pstat').textContent='Preturi: versiune incorporata (sursa live indisponibila)';
+  }
+}
+// reimprospatare automata a preturilor live la fiecare 10 minute
+setInterval(()=>{
+  if(BACKEND_URL){ if(!document.hidden && !dirty) loadFromBackend(); }
+  else if((localStorage.getItem('sheetUrl')||SHEET_URL) && !document.hidden) loadLive();
+}, 600000);
+
+function refreshAllSelects(){
+  fillSelect($('pbrand'), uniq(DATA.panouri.map(p=>p[0])), true);
+  refreshPModels(); fillSelect($('ibrand'), uniq(DATA.invertoare.map(i=>i[0])), true);
+  refreshIput(); refreshBbrand(); refreshBcap();
+}
+function buildRows(){
+  const rows=[['Categorie','Camp1','Camp2','Camp3','Denumire','Pret']];
+  DATA.panouri.forEach(p=>rows.push(['PANOU',p[0],p[1],p[2],'',p[3]]));
+  DATA.invertoare.forEach(i=>rows.push(['INVERTOR',i[0],i[1],i[2],i[3],i[4]]));
+  DATA.baterii.forEach(b2=>rows.push(['BATERIE',b2[0],b2[1],'',b2[2],b2[3]]));
+  Object.entries(DATA.smartmeter).forEach(([k,v])=>{const[a1,t]=k.split('|');rows.push(['SMARTMETER',a1,t,'',v[0],v[1]])});
+  Object.entries(DATA.acc).forEach(([k,v])=>{const[c1,t]=k.split('|');rows.push(['ACCESORIU',c1,t,'',v[0],v[1]])});
+  DATA.ats.forEach(a2=>rows.push(['ATS',a2[0],a2[1],'',a2[2],a2[3]]));
+  Object.entries(DATA.cabluri).forEach(([k,v])=>{const[t,sec]=k.split('|');rows.push(['CABLU',t,sec,'',v[0],v[1]])});
+  Object.keys(DATA.alte).forEach(k=>rows.push(['ALTE',k,'','','',DATA.alte[k]]));
+  Object.keys(DATA.structuraP).forEach(k=>rows.push(['STRUCTURA',k,'','','',DATA.structuraP[k]]));
+  DATA.manopera.forEach(m=>rows.push(['MANOPERA',m[0],m[1],'','',m[2]]));
+  return rows;
+}
+let dirty=false;
+function setCloud(txt,cls){ const e=$('cloudstat'); if(e){ e.textContent=txt; e.className='cloudstat'+(cls?' '+cls:''); } }
+function markDirty(){ dirty=true; setCloud('Modificari nesalvate — apasati "Salveaza in cloud".','dirty'); }
+
+// ---- CITIRE din backend (JSONP, fara probleme CORS) ----
+let _jsonpInProgress=false;
+function loadFromBackend(manual){
+  if(!BACKEND_URL){ if(manual) alert('BACKEND_URL nu este configurat. Vedeti ghidul de instalare.'); return; }
+  if(_jsonpInProgress) return; _jsonpInProgress=true;
+  const fn='__pb'+Date.now();
+  const s=document.createElement('script');
+  const done=(data)=>{ try{delete window[fn]}catch(e){} s.remove(); _jsonpInProgress=false; handle(data); };
+  window[fn]=done;
+  s.onerror=()=>{ done(null); };
+  s.src=BACKEND_URL+(BACKEND_URL.includes('?')?'&':'?')+'callback='+fn+'&t='+Date.now();
+  document.head.appendChild(s);
+  function handle(data){
+    if(!data || !data.ok || !Array.isArray(data.rows)){
+      $('pstat').textContent='Preturi: versiune incorporata (cloud indisponibil)';
+      setCloud('Cloud indisponibil — se folosesc preturile incorporate.','err');
+      return;
+    }
+    applyRows(data.rows); applyOverrides(); refreshAllSelects();
+    const now=new Date().toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
+    $('pstat').textContent='Preturi: CLOUD ✓ ('+now+')';
+    if(!dirty) setCloud('Sincronizat cu cloud la '+now+'.','ok');
+    calc(); if($('adminview').style.display!=='none') renderAdmin();
+  }
+}
+// ---- SCRIERE in backend (POST text/plain, fara preflight) ----
+async function saveToBackend(){
+  if(!BACKEND_URL){ alert('BACKEND_URL nu este configurat. Pana atunci folositi "Exporta CSV".'); return; }
+  const btn=$('savebtn'); btn.disabled=true; const old=btn.textContent; btn.textContent='Se salveaza...';
+  setCloud('Se salveaza in cloud...','dirty');
+  try{
+    const payload=JSON.stringify({token:WRITE_TOKEN, rows:buildRows()});
+    const r=await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:payload});
+    let res={}; try{res=await r.json()}catch(e){}
+    if(res && res.ok===false) throw new Error(res.error||'eroare');
+    // dupa salvare, preturile din cloud devin baza -> stergem override-urile locale
+    localStorage.removeItem(OV_KEY); dirty=false; updCount();
+    const now=new Date().toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
+    setCloud('Salvat in cloud la '+now+' ✓ — vizibil pentru toata echipa.','ok');
+  }catch(e){
+    setCloud('Eroare la salvare. Verificati conexiunea/token-ul. (Alternativ: Exporta CSV)','err');
+    alert('Salvarea in cloud a esuat: '+e.message+'\nVerificati BACKEND_URL si WRITE_TOKEN, sau folositi Exporta CSV.');
+  }finally{ btn.disabled=false; btn.textContent=old; }
+}
+const OV_KEY='priceOverrides';
+function getOv(){ try{return JSON.parse(localStorage.getItem(OV_KEY))||{}}catch(e){return{}} }
+function saveOv(o){ localStorage.setItem(OV_KEY, JSON.stringify(o)); }
+function priceItems(){
+  const L=[];
+  DATA.panouri.forEach(p=>L.push({k:'PANOU|'+p[1], cat:'Panouri fotovoltaice', label:p[0]+' — '+p[1], get:()=>p[3], set:v=>p[3]=v}));
+  DATA.invertoare.forEach(i=>L.push({k:'INVERTOR|'+i[0]+'|'+i[1]+'|'+i[2], cat:'Invertoare', label:i[0]+' '+i[1].toLowerCase()+' '+i[2]+' kW — '+i[3], get:()=>i[4], set:v=>i[4]=v}));
+  DATA.baterii.forEach(b2=>L.push({k:'BATERIE|'+b2[0]+'|'+b2[1], cat:'Baterii', label:b2[0]+' '+b2[1]+' kWh — '+b2[2], get:()=>b2[3], set:v=>b2[3]=v}));
+  Object.entries(DATA.smartmeter).forEach(([k,v])=>L.push({k:'SMARTMETER|'+k, cat:'Smart meter / Gateway', label:k.replace('|',' · ')+' — '+v[0], get:()=>v[1], set:x=>v[1]=x}));
+  Object.entries(DATA.acc).forEach(([k,v])=>L.push({k:'ACCESORIU|'+k, cat:'Tablouri si accesorii', label:v[0]+' ('+k.split('|')[1].toLowerCase()+')', get:()=>v[1], set:x=>v[1]=x}));
+  DATA.ats.forEach(a2=>L.push({k:'ATS|'+a2[0]+'|'+a2[1], cat:'ATS', label:a2[2], get:()=>a2[3], set:v=>a2[3]=v}));
+  Object.entries(DATA.cabluri).forEach(([k,v])=>L.push({k:'CABLU|'+k, cat:'Cabluri alimentare (lei/m)', label:v[0]+' ('+k.replace('|',' · ')+')', get:()=>v[1], set:x=>v[1]=x}));
+  const altLbl={solar6:'Cablu solar 6 mm² (lei/m)',myf10:'Cablu impamantare MYF 10 (lei/m)',myf16:'Cablu impamantare MYF 16 (lei/m)',mc4:'Conectori MC4 (pereche)',canal:'Canal cablu (bara 4 m)',copex:'Copex (rola 50 m)'};
+  Object.keys(DATA.alte).forEach(k=>L.push({k:'ALTE|'+k, cat:'Alte materiale', label:altLbl[k]||k, get:()=>DATA.alte[k], set:v=>DATA.alte[k]=v}));
+  Object.keys(DATA.structuraP).forEach(k=>L.push({k:'STRUCTURA|'+k, cat:'Materiale structura', label:k, get:()=>DATA.structuraP[k], set:v=>DATA.structuraP[k]=v}));
+  DATA.manopera.forEach(m=>L.push({k:'MANOPERA|'+m[0], cat:'Manopera', label:'de la '+m[0]+' kWp ('+m[1]+(m[1]==1?' zi':' zile')+')', get:()=>m[2], set:v=>m[2]=v}));
+  return L;
+}
+function applyOverrides(){ const ov=getOv(); priceItems().forEach(it=>{ if(ov[it.k]!=null) it.set(ov[it.k]); }); updCount(); }
+function updCount(){ const n=Object.keys(getOv()).length; const e=$('pcount'); if(e) e.textContent = n? n+' preturi modificate local':''; }
+window.setPrice = function(k, val){
+  const v=num(val); const ov=getOv(); ov[k]=v; saveOv(ov);
+  const it=priceItems().find(i=>i.k===k); if(it) it.set(v);
+  const inp=document.querySelector('input[data-k="'+k.replace(/"/g,'')+'"]'); if(inp && inp.closest('.pitem')) inp.closest('.pitem').classList.add('modi');
+  updCount(); markDirty(); calc();
+};
+const CAT_ORDER=['Panouri fotovoltaice','Invertoare','Baterii','Smart meter / Gateway','Tablouri si accesorii','ATS','Cabluri alimentare (lei/m)','Alte materiale','Materiale structura','Manopera'];
+window.renderAdmin = function(){
+  const q=($('psearch').value||'').toLowerCase(); const ov=getOv();
+  const groups={};
+  priceItems().forEach(it=>{ if(q && !it.label.toLowerCase().includes(q)) return; (groups[it.cat]=groups[it.cat]||[]).push(it); });
+  const cats=Object.keys(groups).sort((a,b)=>{const ia=CAT_ORDER.indexOf(a),ib=CAT_ORDER.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib);});
+  let h='';
+  for(const cat of cats){
+    const items=groups[cat];
+    h+='<div class="pcat"><h3>'+cat+'<span class="cnt">'+items.length+' produse</span></h3><div class="pgrid">';
+    items.forEach(it=>{
+      const modi = ov[it.k]!=null ? ' modi':'';
+      const est = /estimat|verificat/i.test(it.label) ? '<span class="est" title="Pret estimat / de verificat">estimat</span>' : '';
+      h+='<div class="pitem'+modi+'"><span class="lab">'+it.label+est+'</span><span style="white-space:nowrap"><input type="number" step="0.01" min="0" value="'+it.get()+'" data-k="'+it.k+'" oninput="setPrice(this.dataset.k,this.value)"><span class="unit">RON</span></span></div>';
+    });
+    h+='</div></div>';
+  }
+  $('padmin').innerHTML = h || '<div class="note">Niciun rezultat pentru cautarea curenta.</div>';
+};
+window.resetOverrides = function(){
+  if(confirm('Stergeti modificarile facute pe acest browser si reveniti la preturile din cloud?')){ localStorage.removeItem(OV_KEY); location.reload(); }
+};
+window.showTab = function(which){
+  const isP = which==='preturi';
+  $('adminview').style.display = isP?'block':'none';
+  $('calcview').style.display = isP?'none':'grid';
+  $('tab-oferta').classList.toggle('active', !isP);
+  $('tab-preturi').classList.toggle('active', isP);
+  $('pdfbtn').style.display = isP?'none':'';
+  if(isP) renderAdmin();
+};
+window.askPrices = function(){
+  if(sessionStorage.getItem('pricesUnlocked')==='1' || !PRICES_PASSWORD){ showTab('preturi'); return; }
+  const p=prompt('Parola pentru Preturi achizitie:');
+  if(p===null) return;
+  if(p===PRICES_PASSWORD){ sessionStorage.setItem('pricesUnlocked','1'); showTab('preturi'); }
+  else alert('Parola incorecta.');
+};
+// ---- Adaugare produs nou ----
+const ADD_SCHEMA = {
+  PANOU:    {label:'Panou fotovoltaic', f:[{k:'c1',l:'Brand'},{k:'c2',l:'Model (textul din lista)'},{k:'c3',l:'Putere [W]',num:1},{k:'pret',l:'Pret achizitie [RON]',num:1}]},
+  INVERTOR: {label:'Invertor', f:[{k:'c1',l:'Brand'},{k:'c2',l:'Tip bransament',sel:['Monofazat','Trifazat']},{k:'c3',l:'Putere [kW]',num:1},{k:'den',l:'Model'},{k:'pret',l:'Pret [RON]',num:1}]},
+  BATERIE:  {label:'Baterie', f:[{k:'c1',l:'Brand'},{k:'c2',l:'Capacitate [kWh]',num:1},{k:'den',l:'Model'},{k:'pret',l:'Pret [RON]',num:1}]},
+  SMARTMETER:{label:'Smart meter / Gateway', f:[{k:'c1',l:'Brand invertor'},{k:'c2',l:'Tip bransament',sel:['Monofazat','Trifazat']},{k:'den',l:'Model'},{k:'pret',l:'Pret [RON]',num:1}]},
+  ACCESORIU:{label:'Accesoriu (tablou/cofret/etc.)', f:[{k:'c1',l:'Tip',sel:['TABLOU_AC','TABLOU_DC','COFRET','SIGURANTE','BMP']},{k:'c2',l:'Tip bransament',sel:['Monofazat','Trifazat']},{k:'den',l:'Denumire'},{k:'pret',l:'Pret [RON]',num:1}]},
+  ATS:      {label:'ATS', f:[{k:'c1',l:'Tip bransament',sel:['Monofazat','Trifazat']},{k:'c2',l:'Curent maxim [A]',num:1},{k:'den',l:'Denumire'},{k:'pret',l:'Pret [RON]',num:1}]},
+  CABLU:    {label:'Cablu alimentare', f:[{k:'c1',l:'Tip bransament',sel:['Monofazat','Trifazat']},{k:'c2',l:'Sectiune (ex: 4 mm²)'},{k:'den',l:'Denumire'},{k:'pret',l:'Pret [lei/m]',num:1}]},
+  STRUCTURA:{label:'Material structura', f:[{k:'c1',l:'Denumire material'},{k:'pret',l:'Pret [RON]',num:1}]},
+};
+window.openAdd = function(){
+  const sel=$('addcat');
+  sel.innerHTML = Object.entries(ADD_SCHEMA).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  renderAddForm();
+  $('adderr').textContent='';
+  $('addmodal').style.display='flex';
+};
+window.closeAdd = function(){ $('addmodal').style.display='none'; };
+window.renderAddForm = function(){
+  const cat=$('addcat').value, sc=ADD_SCHEMA[cat];
+  $('addfields').innerHTML = sc.f.map(fl=>{
+    if(fl.sel) return `<label>${fl.l}</label><select data-k="${fl.k}">${fl.sel.map(o=>`<option>${o}</option>`).join('')}</select>`;
+    return `<label>${fl.l}</label><input data-k="${fl.k}" type="${fl.num?'number':'text'}"${fl.num?' step="0.01" min="0"':''}>`;
+  }).join('');
+  $('adderr').textContent='';
+};
+window.submitAdd = function(){
+  const cat=$('addcat').value, sc=ADD_SCHEMA[cat], v={};
+  for(const fl of sc.f){
+    const el=$('addfields').querySelector('[data-k="'+fl.k+'"]');
+    let val=(el.value||'').trim();
+    if(val===''){ $('adderr').textContent='Completati: '+fl.l; el.focus(); return; }
+    v[fl.k]= fl.num ? num(val) : val;
+  }
+  // adauga in DATA dupa categorie
+  if(cat==='PANOU') DATA.panouri.push([v.c1, v.c2, v.c3, v.pret]);
+  else if(cat==='INVERTOR') DATA.invertoare.push([v.c1, v.c2, v.c3, v.den, v.pret]);
+  else if(cat==='BATERIE') DATA.baterii.push([v.c1, v.c2, v.den, v.pret]);
+  else if(cat==='SMARTMETER'){ const key=v.c1+'|'+v.c2; if(DATA.smartmeter[key] && !confirm('Exista deja '+key+'. Inlocuiti?')) return; DATA.smartmeter[key]=[v.den, v.pret]; }
+  else if(cat==='ACCESORIU'){ const key=v.c1+'|'+v.c2; if(DATA.acc[key] && !confirm('Exista deja '+key+'. Inlocuiti?')) return; DATA.acc[key]=[v.den, v.pret]; }
+  else if(cat==='ATS') DATA.ats.push([v.c1, v.c2, v.den, v.pret]);
+  else if(cat==='CABLU'){ const key=v.c1+'|'+v.c2; if(DATA.cabluri[key] && !confirm('Exista deja '+key+'. Inlocuiti?')) return; DATA.cabluri[key]=[v.den, v.pret]; }
+  else if(cat==='STRUCTURA') DATA.structuraP[v.c1]=v.pret;
+  closeAdd();
+  refreshAllSelects(); markDirty(); calc();
+  $('psearch').value = v.den || v.c2 || v.c1; renderAdmin();
+  setCloud('Produs adaugat. Apasati "Salveaza in cloud" ca sa-l pastrati.','dirty');
+};
+function csvCell(v){ v=String(v); return (v.includes(',')||v.includes('"')||v.includes('\n')) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+window.exportCsv = function(){
+  const csv = buildRows().map(r=>r.map(csvCell).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});
+  const a2 = document.createElement('a');
+  a2.href = URL.createObjectURL(blob); a2.download = 'Preturi inoSALES.csv'; a2.click();
+};
+window.exportPage = async function(){
+  try{
+    if(location.protocol==='file:') throw new Error('file');
+    const r = await fetch(location.href.split('#')[0].split('?')[0], {cache:'no-store'});
+    if(!r.ok) throw new Error(r.status);
+    let src = await r.text();
+    const json = JSON.stringify(DATA);
+    let found=false;
+    src = src.replace(/const DATA = \{.*\};/, ()=>{found=true; return 'const DATA = '+json+';';});
+    if(!found) throw new Error('marker');
+    const blob = new Blob([src], {type:'text/html;charset=utf-8'});
+    const a2 = document.createElement('a');
+    a2.href = URL.createObjectURL(blob); a2.download = 'inoSales Calculator.html'; a2.click();
+    alert('Pagina a fost descarcata cu preturile curente incorporate.\nIncarcati fisierul la acelasi link (inlocuiti-l pe hosting) sau retrimiteti-l echipei - toata lumea va vedea preturile noi.');
+  }catch(e){
+    alert('Descarcarea paginii actualizate functioneaza doar cand pagina e deschisa de pe un link (http/https), nu dintr-un fisier local.\nFolositi "Exporta CSV" si trimiteti-mi fisierul, sau incarcati-l in Google Sheets (sursa live).');
+  }
+};
+let booted=false;
+function boot(){
+  if(booted) return; booted=true;
+  initSelectors();
+  $('pmodel').value='CS6R-440 N-type — 440W';
+  $('iput').value='8'; $('bcap').value='16';
+  applyOverrides();
+  calc();
+  if(BACKEND_URL) loadFromBackend(); else loadLive();
+}
+window.tryUnlock = function(){
+  const v=$('gatepw').value;
+  if(v===ACCESS_PASSWORD){
+    sessionStorage.setItem('unlocked','1');
+    $('gate').style.display='none';
+    document.body.classList.remove('locked');
+    boot();
+  }else{
+    $('gateerr').textContent='Parola incorecta.';
+    $('gatepw').value=''; $('gatepw').focus();
+  }
+};
+$('gatepw').addEventListener('keydown',e=>{ if(e.key==='Enter') tryUnlock(); });
+if(!ACCESS_PASSWORD || sessionStorage.getItem('unlocked')==='1'){
+  $('gate').style.display='none'; document.body.classList.remove('locked'); boot();
+}else{
+  $('gatepw').focus();
+}
+</script>
+</body>
+</html>
