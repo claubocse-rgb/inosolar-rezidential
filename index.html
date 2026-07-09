@@ -114,6 +114,8 @@ tr.tot td{background:#c6e0b4;font-weight:700;font-size:14.5px}
  </nav>
  <div style="display:flex;align-items:center;gap:10px">
   <span id="pstat" style="font-size:11px;opacity:.85"></span>
+  <button class="btn" onclick="saveOffer()">Salveaza oferta</button>
+  <button class="btn" onclick="openOffer()">Deschide oferta</button>
   <button class="btn" id="pdfbtn" onclick="window.print()">Genereaza PDF oferta</button>
  </div>
 </header>
@@ -519,6 +521,38 @@ function refreshAllSelects(){
   refreshPModels(); fillSelect($('ibrand'), uniq(DATA.invertoare.map(i=>i[0])), true);
   refreshIput(); refreshBbrand(); refreshBcap();
 }
+const OFFER_IDS=['kwp','pbrand','pmodel','tip','ibrand','iput','bbrand','bcap','nbat','montaj','orient','lalim','mpp','limp']; const APP_TAG='rez';
+function _offerSet(id,val,fire){ const e=document.getElementById(id); if(e&&val!=null){ e.value=val; if(fire) e.dispatchEvent(new Event('change',{bubbles:true})); } }
+function snapshotOffer(){
+  const v={}; OFFER_IDS.forEach(id=>{ const e=document.getElementById(id); if(e) v[id]=e.value; });
+  const o={app:APP_TAG, v:v};
+  // (rezidential: fara liste dinamice)
+  return o;
+}
+function saveOffer(){
+  try{
+    const o=snapshotOffer();
+    const blob=new Blob([JSON.stringify(o,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    const st=(new Date()).toISOString().slice(0,16).replace('T','_').replace(/:/g,'-');
+    a.download='oferta-inosolar-'+st+'.json'; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },100);
+  }catch(e){ alert('Nu am putut salva oferta: '+e.message); }
+}
+function restoreOffer(o){
+  if(!o||!o.v){ alert('Fisier ofertă invalid.'); return; }
+  ['tip','pbrand','ibrand','bbrand'].forEach(id=>_offerSet(id,o.v[id],true));
+  Object.keys(o.v).forEach(id=>_offerSet(id,o.v[id],false));
+  // (rezidential: fara liste dinamice)
+  calc();
+}
+function openOffer(){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+  inp.onchange=e=>{ const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+    rd.onload=()=>{ try{ restoreOffer(JSON.parse(rd.result)); }catch(err){ alert('Fisier ofertă invalid.'); } }; rd.readAsText(f); };
+  inp.click();
+}
+
 function buildRows(){
   const rows=[['Categorie','Camp1','Camp2','Camp3','Denumire','Pret']];
   DATA.panouri.forEach(p=>rows.push(['PANOU',p[0],p[1],p[2],'',p[3]]));
