@@ -464,7 +464,9 @@ function num(v){
   return parseFloat(v)||0;
 }
 function applyCsv(text){ applyRows(parseCSV(text)); }
+let _passRows=[];
 function applyRows(rows){
+  _passRows=[];
   const P=[],I=[],B=[],SM={},AC={},AT=[],CB={},ST={},MN=[],AL={};
   const S=v=>String(v==null?'':v).trim();
   for(const r of rows){
@@ -480,6 +482,7 @@ function applyRows(rows){
     else if(cat==='ALTE') AL[c1]=pret;
     else if(cat==='STRUCTURA') ST[c1]=pret;
     else if(cat==='MANOPERA') MN.push([num(c1),num(c2),pret]);
+    else if(cat && cat!=='CATEGORIE') _passRows.push(r.slice());
   }
   if(P.length) DATA.panouri=P;
   if(I.length) DATA.invertoare=I;
@@ -565,6 +568,7 @@ function buildRows(){
   Object.keys(DATA.alte).forEach(k=>rows.push(['ALTE',k,'','','',DATA.alte[k]]));
   Object.keys(DATA.structuraP).forEach(k=>rows.push(['STRUCTURA',k,'','','',DATA.structuraP[k]]));
   DATA.manopera.forEach(m=>rows.push(['MANOPERA',m[0],m[1],'','',m[2]]));
+  if(_passRows&&_passRows.length) _passRows.forEach(r=>rows.push(r));
   return rows;
 }
 let dirty=false;
